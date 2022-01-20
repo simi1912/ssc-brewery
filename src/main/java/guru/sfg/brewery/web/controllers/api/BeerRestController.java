@@ -1,22 +1,8 @@
-/*
- *  Copyright 2020 the original author or authors.
- *
- * This program is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 package guru.sfg.brewery.web.controllers.api;
 
+import guru.sfg.brewery.security.perms.BeerCreatePermission;
+import guru.sfg.brewery.security.perms.BeerReadPermission;
+import guru.sfg.brewery.security.perms.BeerUpdatePermission;
 import guru.sfg.brewery.services.BeerService;
 import guru.sfg.brewery.web.model.BeerDto;
 import guru.sfg.brewery.web.model.BeerPagedList;
@@ -27,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.ConstraintViolationException;
@@ -35,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@CrossOrigin
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/")
@@ -46,6 +34,7 @@ public class BeerRestController {
 
     private final BeerService beerService;
 
+    @BeerReadPermission
     @GetMapping(produces = { "application/json" }, path = "beer")
     public ResponseEntity<BeerPagedList> listBeers(@RequestParam(value = "pageNumber", required = false) Integer pageNumber,
                                                    @RequestParam(value = "pageSize", required = false) Integer pageSize,
@@ -72,6 +61,7 @@ public class BeerRestController {
         return new ResponseEntity<>(beerList, HttpStatus.OK);
     }
 
+    @BeerReadPermission
     @GetMapping(path = {"beer/{beerId}"}, produces = { "application/json" })
     public ResponseEntity<BeerDto> getBeerById(@PathVariable("beerId") UUID beerId,
                                                @RequestParam(value = "showInventoryOnHand", required = false) Boolean showInventoryOnHand){
@@ -85,11 +75,13 @@ public class BeerRestController {
         return new ResponseEntity<>(beerService.findBeerById(beerId, showInventoryOnHand), HttpStatus.OK);
     }
 
+    @BeerReadPermission
     @GetMapping(path = {"beerUpc/{upc}"}, produces = { "application/json" })
     public ResponseEntity<BeerDto> getBeerByUpc(@PathVariable("upc") String upc){
         return new ResponseEntity<>(beerService.findBeerByUpc(upc), HttpStatus.OK);
     }
 
+    @BeerCreatePermission
     @PostMapping(path = "beer")
     public ResponseEntity saveNewBeer(@Valid @RequestBody BeerDto beerDto){
 
@@ -103,6 +95,7 @@ public class BeerRestController {
         return new ResponseEntity(httpHeaders, HttpStatus.CREATED);
     }
 
+    @BeerUpdatePermission
     @PutMapping(path = {"beer/{beerId}"}, produces = { "application/json" })
     public ResponseEntity updateBeer(@PathVariable("beerId") UUID beerId, @Valid @RequestBody BeerDto beerDto){
 
@@ -111,15 +104,17 @@ public class BeerRestController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @DeleteMapping({"beer/{beerId}"})
+
+    @PreAuthorize("hasAuthority('beer.delete')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping(path = {"beer/{beerId}"})
     public void deleteBeer(@PathVariable("beerId") UUID beerId){
         beerService.deleteById(beerId);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    ResponseEntity<List> badReqeustHandler(ConstraintViolationException e){
+    ResponseEntity<List> badRequestHandler(ConstraintViolationException e){
         List<String> errors = new ArrayList<>(e.getConstraintViolations().size());
 
         e.getConstraintViolations().forEach(constraintViolation -> {

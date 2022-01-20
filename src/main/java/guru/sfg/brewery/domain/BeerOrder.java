@@ -40,18 +40,6 @@ import java.util.UUID;
 @NoArgsConstructor
 public class BeerOrder extends BaseEntity {
 
-    @Builder
-    public BeerOrder(UUID id, Long version, Timestamp createdDate, Timestamp lastModifiedDate, String customerRef, Customer customer,
-                     Set<BeerOrderLine> beerOrderLines, OrderStatusEnum orderStatus,
-                     String orderStatusCallbackUrl) {
-        super(id, version, createdDate, lastModifiedDate);
-        this.customerRef = customerRef;
-        this.customer = customer;
-        this.beerOrderLines = beerOrderLines;
-        this.orderStatus = orderStatus;
-        this.orderStatusCallbackUrl = orderStatusCallbackUrl;
-    }
-
     private String customerRef;
 
     @ManyToOne
@@ -63,4 +51,16 @@ public class BeerOrder extends BaseEntity {
 
     private OrderStatusEnum orderStatus = OrderStatusEnum.NEW;
     private String orderStatusCallbackUrl;
+
+    @Builder
+    public BeerOrder(UUID id, Long version, Timestamp createdDate, Timestamp lastModifiedDate, String customerRef, Customer customer,
+                     Set<BeerOrderLine> beerOrderLines, OrderStatusEnum orderStatus,
+                     String orderStatusCallbackUrl) {
+        super(id, version, createdDate, lastModifiedDate);
+        this.customerRef = customerRef;
+        this.customer = customer;
+        this.beerOrderLines = beerOrderLines;
+        this.orderStatus = orderStatus;
+        this.orderStatusCallbackUrl = orderStatusCallbackUrl;
+    }
 }

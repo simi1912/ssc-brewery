@@ -31,6 +31,12 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 public class BeerOrderDto extends BaseItem {
 
+    private UUID customerId;
+    private String customerRef;
+    private List<BeerOrderLineDto> beerOrderLines;
+    private OrderStatusEnum orderStatus;
+    private String orderStatusCallbackUrl;
+
     @Builder
     public BeerOrderDto(UUID id, Integer version, OffsetDateTime createdDate, OffsetDateTime lastModifiedDate, UUID customerId, List<BeerOrderLineDto> beerOrderLines,
                         OrderStatusEnum orderStatus, String orderStatusCallbackUrl, String customerRef) {
@@ -42,9 +48,5 @@ public class BeerOrderDto extends BaseItem {
         this.customerRef = customerRef;
     }
 
-    private UUID customerId;
-    private String customerRef;
-    private List<BeerOrderLineDto> beerOrderLines;
-    private OrderStatusEnum orderStatus;
-    private String orderStatusCallbackUrl;
+
 }
